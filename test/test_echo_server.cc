@@ -7,13 +7,19 @@
 
 #ifdef _WIN32
 #define PIPENAME "\\\\?\\pipe\\echo.sock"
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "Advapi32.lib")
+#pragma comment(lib, "Iphlpapi.lib")
+#pragma comment(lib, "Psapi.lib")
+#pragma comment(lib, "user32.lib")
+#pragma comment(lib, "userenv.lib")
 #else
 #define PIPENAME "/tmp/echo.sock"
 #endif
 
-namespace hachi{
+using namespace hachi;
 
-uv_loop_t *loop;
+uv_loop_t* loop;
 
 void echo_write(uv_write_t *req, int status) {
     if (status < 0) {
@@ -55,30 +61,30 @@ void on_new_connection(uv_stream_t *server, int status) {
     }
 }
 
+
 void remove_sock(int sig) {
-    uv_fs_t req;
-    uv_fs_unlink(loop, &req, PIPENAME, NULL);
-    exit(0);
+  uv_fs_t req;
+  uv_fs_unlink(loop, &req, PIPENAME, NULL);
+  exit(0);
 }
+
 
 int main() {
-    loop = uv_default_loop();
+  loop = uv_default_loop();
 
-    uv_pipe_t server;
-    uv_pipe_init(loop, &server, 0);
+  uv_pipe_t server;
+  uv_pipe_init(loop, &server, 0);
 
-    signal(SIGINT, remove_sock);
+  signal(SIGINT, remove_sock);
 
-    int r;
-    if ((r = uv_pipe_bind(&server, PIPENAME))) {
-        fprintf(stderr, "Bind error %s\n", uv_err_name(r));
-        return 1;
-    }
-    if ((r = uv_listen((uv_stream_t*) &server, 128, on_new_connection))) {
-        fprintf(stderr, "Listen error %s\n", uv_err_name(r));
-        return 2;
-    }
-    return uv_run(loop, UV_RUN_DEFAULT);
+  int r;
+  if ((r = uv_pipe_bind(&server, PIPENAME))) {
+    fprintf(stderr, "Bind error %s\n", uv_err_name(r));
+    return 1;
+  }
+  if ((r = uv_listen((uv_stream_t*)&server, 128, on_new_connection))) {
+    fprintf(stderr, "Listen error %s\n", uv_err_name(r));
+    return 2;
+  }
+  return uv_run(loop, UV_RUN_DEFAULT);
 }
-
-} // namespace hachi
