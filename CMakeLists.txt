@@ -29,8 +29,16 @@ include_directories(${CMAKE_SOURCE_DIR}/libuv/include)
 
 file(GLOB SOURCES_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cc)
 if(WIN32)
-  set(LINK_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/libuv/libs/win/x86/libuvd.lib)
-  set(LINK_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/libuv/libs/win/x86/libuv.lib)
+
+  if(CMAKE_CL_64)
+    set(platform x64)
+  else()
+    set(platform x86)
+  endif()    
+
+  set(LINK ws2_32.lib Advapi32.lib Iphlpapi.lib Psapi.lib user32.lib userenv.lib)
+  set(LINK_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/libuv/libs/win/${platform}/libuvd.lib)
+  set(LINK_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/libuv/libs/win/${platform}/libuv.lib)
 
   file(GLOB APP_SOURCES test/*.cc)
   foreach( testsourcefile ${APP_SOURCES} )
@@ -39,7 +47,7 @@ if(WIN32)
       string(REGEX REPLACE ".+/(.+)\\..*" "\\1" testname ${testsourcefile})
       add_executable( ${testname} ${SOURCES_FILES} ${testsourcefile} )
       # Make sure YourLib is linked to each app
-      target_link_libraries( ${testname} debug ${LINK_DEBUG} optimized ${LINK_RELEASE} )
+      target_link_libraries( ${testname} ${LINK} debug ${LINK_DEBUG} optimized ${LINK_RELEASE} )
   endforeach( testsourcefile ${APP_SOURCES} )
 
   # add_executable(test_ipc_server  ipc_server.cc test/test_ipc_server.cc)

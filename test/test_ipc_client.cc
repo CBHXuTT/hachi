@@ -11,12 +11,6 @@
 
 #ifdef _WIN32
 #define PIPENAME "\\\\?\\pipe\\echo.sock"
-#pragma comment(lib,"ws2_32.lib")
-#pragma comment (lib,"Advapi32.lib")
-#pragma comment (lib,"Iphlpapi.lib")
-#pragma comment(lib, "Psapi.lib")
-#pragma comment(lib, "user32.lib")
-#pragma comment(lib, "userenv.lib")
 #else
 #define PIPENAME "/tmp/echo.sock"
 #endif
