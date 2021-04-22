@@ -5,7 +5,7 @@ else()
   project(hachi CXX)
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fno-strict-aliasing")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fno-strict-aliasing")
 
 function(include_sub_directories_recursively root_dir)
     if (IS_DIRECTORY ${root_dir})               # 当前路径是一个目录吗，是的话就加入到包含目录
@@ -46,6 +46,7 @@ if(WIN32)
       # string( REPLACE ".cc" "" testname ${testsourcefile} )
       string(REGEX REPLACE ".+/(.+)\\..*" "\\1" testname ${testsourcefile})
       add_executable( ${testname} ${SOURCES_FILES} ${testsourcefile} )
+      target_compile_features(${testname} PRIVATE cxx_std_17)
       # Make sure YourLib is linked to each app
       target_link_libraries( ${testname} ${LINK} debug ${LINK_DEBUG} optimized ${LINK_RELEASE} )
   endforeach( testsourcefile ${APP_SOURCES} )
