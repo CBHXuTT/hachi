@@ -3,6 +3,10 @@
 #include <assert.h>
 #include <iostream>
 
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
 namespace hachi {
 
 void ClientNotifySend(uv_async_t* handle) {
@@ -29,7 +33,7 @@ void ClientSendCallback(uv_write_t* req, int status) {
       if (status == UV_ECANCELED) {
         return;
       }
-      ctx->CallErrorHandler(status, uv_err_name(status));
+      ctx->CallErrorHandler(status, uv_strerror(status));
       ctx->Close();
     } else {
       ctx->DoSend();
@@ -45,12 +49,11 @@ void ClientReadCallback(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
       msg.resize(nread);
       std::copy(buf->base, buf->base + buf->len, msg.begin());
       ctx->CallMessageHandler(msg);
-      ctx->Send(msg);
     }
     if (nread < 0) {
       if (nread != UV_EOF) {
         // error
-        ctx->CallErrorHandler(nread, uv_err_name(nread));
+        ctx->CallErrorHandler(nread, uv_strerror(nread));
       }
       uv_close((uv_handle_t*)ctx->client_, nullptr);
     }
@@ -62,8 +65,8 @@ void OnConnection(uv_connect_t* req, int status) {
   IpcClient* ctx = (IpcClient*)uv_handle_get_data((uv_handle_t*)req);
   if (ctx != nullptr) {
     if (status < 0) {
-      // error!
       ctx->CallErrorHandler(status, uv_err_name(status));
+      ctx->Close();
       return;
     }
     uv_handle_set_data((uv_handle_t*)ctx->client_, (void*)ctx);
@@ -109,6 +112,14 @@ void IpcClientWorker(void* arg) {
     if (code != 0)
       goto error;
 
+    std::cout << "pipe:" << ctx->pipe_name_ << std::endl;
+    if (fs::exists(ctx->pipe_name_)) {
+      std::cout << "exist." << std::endl;
+    }
+    else {
+      std::cout << "not exist." << std::endl;
+    }
+
     uv_handle_set_data((uv_handle_t*)ctx->connect_, (void*)ctx);
     uv_pipe_connect(ctx->connect_, ctx->client_, ctx->pipe_name_.data(),
                     OnConnection);
@@ -120,7 +131,7 @@ void IpcClientWorker(void* arg) {
   error:
     uv_loop_close(ctx->loop_);
     if (code != 0) {
-      ctx->CallErrorHandler(code, uv_err_name(code));
+      ctx->CallErrorHandler(code, uv_strerror(code));
     }
   }
 }

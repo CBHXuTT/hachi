@@ -10,9 +10,9 @@
 #include "ipc_server.h"
 
 #ifdef _WIN32
-#define PIPENAME "\\\\?\\pipe\\echo.sock"
+#define PIPENAME "\\\\?\\pipe\\worklinkshot.sock"
 #else
-#define PIPENAME "/tmp/echo.sock"
+#define PIPENAME "/worklinkshot/shot.sock"
 #endif
 
 int main() {
@@ -36,7 +36,7 @@ int main() {
       once = false;
       // server->Send("hello");
     }
-    server->Send("hello");
+    //server->Send("hello");
     alive = server->IsAlive();
   }
 

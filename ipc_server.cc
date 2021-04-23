@@ -29,7 +29,7 @@ void SendCallback(uv_write_t* req, int status) {
       if (status == UV_ECANCELED) {
         return;
       }
-      ctx->CallErrorHandler(status, uv_err_name(status));
+      ctx->CallErrorHandler(status, uv_strerror(status));
       ctx->Close();
     } else {
       ctx->DoSend();
@@ -50,7 +50,7 @@ void ReadCallback(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf) {
     if (nread < 0) {
       if (nread != UV_EOF) {
         // error
-        ctx->CallErrorHandler(nread, uv_err_name(nread));
+        ctx->CallErrorHandler(nread, uv_strerror(nread));
       }
       uv_close((uv_handle_t*)ctx->client_, nullptr);
     }
@@ -63,7 +63,7 @@ void OnClientConnection(uv_stream_t* server, int status) {
   if (ctx != nullptr) {
     if (status == -1) {
       // error!
-      ctx->CallErrorHandler(status, uv_err_name(status));
+      ctx->CallErrorHandler(status, uv_strerror(status));
       return;
     }
     uv_pipe_t* client = ctx->client_;

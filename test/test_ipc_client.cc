@@ -10,9 +10,9 @@
 #include "ipc_client.h"
 
 #ifdef _WIN32
-#define PIPENAME "\\\\?\\pipe\\echo.sock"
+#define PIPENAME "\\\\?\\pipe\\worklinkshot.sock"
 #else
-#define PIPENAME "/tmp/echo.sock"
+#define PIPENAME "/worklinkshot/shot.sock"
 #endif
 
 
